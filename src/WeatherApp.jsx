@@ -1,32 +1,40 @@
-import { useState } from "react";
+import { useState } from 'react'
+
+//TODO: esto no se hace se pone en un file en la raiz del proyecto en un file .env y se accede con process.env.REACT_APP_API_KEY y se ignora en el .gitignore
+const API_KEY = 'f735c4bd559feab89881757d990db5dd'
 
 export const WeatherApp = () => {
-  const urlBase = "http://api.openweathermap.org/geo/1.0/direct";
-  const API_KEY = "f735c4bd559feab89881757d990db5dd";
+  // TODO: encontré este endpoint que es mejor que el que estas usando, da mas información
+  // var url = "https://api.openweathermap.org/data/2.5/weather?q=" + encodeURIComponent( city ) + "&cnt=1" "&lang=" + "es" + "&APPID=" + APIKEY;
 
-  const [ciudad, setCiudad] = useState("");
-  const [dataClima, setDataClima] = useState(null);
+  const [ciudad, setCiudad] = useState('')
+  const [dataClima, setDataClima] = useState(null)
+
+  // TODO: Acostumbrate a hacer todo en ingles
 
   const handleChange = (event) => {
-    setCiudad(event.target.value);
-  };
+    setCiudad(event.target.value)
+  }
 
   const handleSubmit = (event) => {
-    event.preventDefault();
-    if (ciudad.length > 0) fetchClima();
-  };
+    event.preventDefault()
+    if (ciudad.length > 0) fetchClima()
+  }
 
   const fetchClima = async () => {
     try {
       const response = await fetch(
-        `${urlBase}?q=${ciudad}&limit=1&appid=${API_KEY}`
-      );
-      const data = await response.json();
-      setDataClima(data);
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+          ciudad
+        )}&cnt=1&lang=es&APPID=${API_KEY}`
+      )
+      const data = await response.json()
+      console.log(data)
+      setDataClima(data)
     } catch (error) {
-      console.error("Ocurrio el siguiente problema: ", error);
+      console.error('Ocurrio el siguiente problema: ', error)
     }
-  };
+  }
 
   return (
     <div className="container">
@@ -42,13 +50,41 @@ export const WeatherApp = () => {
       </form>
       {dataClima && (
         <div>
-          <h2>Información de {dataClima[0].name}</h2>
-          <p>País: {dataClima[0].country}</p>
-          <p>Latitud: {dataClima[0].lat}</p>
-          <p>Longitud: {dataClima[0].lon}</p>
-          {dataClima[0].state && <p>Estado: {dataClima[0].state}</p>}
+          <h2>Información de {dataClima.name}</h2>
+          <div
+            style={{
+              display: 'grid',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '20px',
+            }}
+          >
+            <div>
+              Temperatura: {(dataClima.main.temp - 273.15).toFixed(2)}°C
+            </div>
+            <div>
+              Sensación térmica:{' '}
+              {(dataClima.main.feels_like - 273.15).toFixed(2)}°C
+            </div>
+            <div>Humedad : {dataClima.main.humidity}%</div>
+            <div>Presión : {dataClima.main.pressure} hPa</div>
+            <div>
+              Amanece:{' '}
+              {new Date(dataClima.sys.sunrise * 1000).toLocaleTimeString()}
+            </div>
+            <div>
+              Atardece:{' '}
+              {new Date(dataClima.sys.sunset * 1000).toLocaleTimeString()}
+            </div>
+          </div>
+          <p>País: {dataClima.sys.country}</p>
+          <p>Latitud: {dataClima.coord.lat}</p>
+          <p>Longitud: {dataClima.coord.lon}</p>
+          {dataClima.weather[0] && (
+            <p>Estado: {dataClima.weather[0].description} </p>
+          )}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
